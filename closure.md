@@ -21,7 +21,7 @@ Aus diesem Beispiel werden zunächst 2 wichtige Punkte deutlich:
 
 - Die innere Funktion "fB()" greift sowohl auf Variable "x" in der globalen Umgebung als auch auf die Variable "y" in ihrer äußeren Umgebung (aus Funktion "fA()"),
 
-- Die inneren Funktion "fB()" nimmt, in ihrer Rolle als Rückgabewert der äußeren Funktion "fA()", die Variable "y" der äußeren Funktion "fA()" mit. Aus diesem Grund kann die neugelidete Funktion "fSumme()" ohne irgendein beigegebenes Argument 20 auf die globale Variable "x" (mit einem Wert von 10) aufsummieren. 
+- Die inneren Funktion "fB()" nimmt, in ihrer Rolle als Rückgabewert der äußeren Funktion "fA()", die Variable "y" der äußeren Funktion "fA()" mit. Aus diesem Grund kann die neugelidete Funktion "fSumme()" ohne irgendein beigegebenes Argument 20 auf die globale Variable "x" (mit einem Wert von 10) aufsummieren.
 
 Ganz trivial ist das nicht: Normalerweise findet ein Aufräumprozeß nach der Laufzeit einer Funktion statt, wo lokale, obsolet gewordene Variablen gelöscht werden (die sog. "garbage collection"). In Javascript erfolgt dieses Aufräumen allerdings nach einem Referenzkriterium: Variablen werden erst dann nach Funktionsausführung gesammelt und gelöscht, wenn keine Referenz mehr auf sie existiert. Da dies hier für "y" innerhalb von "fA()" hinsichtlich "fB()" zutrifft, wird bei der Einrichtung der Funktion "fSumme())" mit "fB()" als Rückgabewert von "fA()" die Variable "y" als "fB()"-zugehörig mitgeliefert.
 
@@ -74,5 +74,19 @@ let testSieben =  testFunktion(7); // (20 + 30 + 7) / 10 = 5.7
 Praktische Beispiele
 --------------------
 
-Vor allem im Bereich der Interaktion von Javascript und der Gestaltung des HTML (präzisär: dem Document Object Model, auch DOM genannt) eröffnen sich eine Reihe von Möglichkeiten. 
+Vor allem im Bereich der Interaktion zwischen Javascript und der Manipulation des HTML bzw. CSS  (präziser, dem Document Object Model, DOM genannt) eröffnen sich eine Reihe von Möglichkeiten. Eine Innere Funktion, die vom Zugriff auf die Variablen seiner äußeren Umgebung profitiert, kann jeweils mit unterschiedlichen  Umgebungsvariablen unterschiedlichen Funktionsnamen zugewiesen werden: Die Funktionalität der zurückgegebenen inneren Funktion kann damit auf unterschiedliche Variablen angewandt werden.
 
+Im vorliegenden Beispiel geht es um eine Funktion, die einen bestimmten Farbkontrast gemäss den [in diesem WCAG 2 Dokument](https://www.w3.org/TR/WCAG20-TECHS/G18.html) dargestellten Vorgaben sucht. Ausgangspunkt ist eine beliebige Hintergrund Farbe, von der aus die Farbintensität der Textfarbe gesucht wird, so dass ein vorgegebenes Kontrast-Verhältnis erzielt wird. Ich habe diese Funktion für diesen Artikel entwickelt und [kann hier en detail eingesehen werden](https://github.com/a26z/closure). Zu vier Hintergrundfarben suche ich die dazugehörigen Textfarben, die ein Kontrastverhältnis so nah wie möglich an den Wert 7 herankommen sollen. Die funktion wird folgendermaßen aufgerufen:
+
+```
+kontrastRatio(7, "aacdee");
+```
+
+Als Rückgabewert kommt ein Objekt der die Hintergrund- und dazügehörige Textfarbe mit einem Kontrastverhältnis-Wert möglichst nah 7 geht:
+
+```
+{
+    bg: "#aacdee",
+    fg: "#1c2e4f"
+}
+```

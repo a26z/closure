@@ -5,7 +5,22 @@
  * @return {string[]} Array mit 3 (Hex) Elementen (zBs. ['ff', 'ab', '56'])
  * @see {@link hexToRgbStd}
  */
-let hexToArr = (hex) => hex.match(/[a-f0-9]{2}/gi);
+ let hexToArr = (hex) => {
+     let dreier = /\b[a-f0-9]{3}\b/i;
+     let sechser = /\b[a-f0-9]{6}\b/i;
+     try {
+         if (dreier.test(hex)) {
+             return hex.match(/[a-f0-9]{1}/gi).map((char) => char + char);
+         } else if(sechser.test(hex)) {
+             return hex.match(/[a-f0-9]{2}/gi);
+         } else {
+             throw "Es ist ein Fehler aufgetreten."
+         }
+     } catch(e) {
+         console.error(e)
+     }
+ }
+//let hexToArr = (hex) => hex.match(/[a-f0-9]{2}/gi);
 
 /**
  * Rundet eine Dezimalzahl auf 2 Stellen auf (zBs. 3,78493271 auf 3,79).
@@ -14,7 +29,7 @@ let hexToArr = (hex) => hex.match(/[a-f0-9]{2}/gi);
  * @param {number} [dec = 2] Dezimalstellen (Optional. 2 Stellen sind voreingestellt.)
  * @return {number} Aufgerundete Zahl.
  */
-let roundPct = (val, dec = 2) => Number(Math.round(val + "e" + dec) + "e-" + dec) * 100;
+let roundPct = (val, dec = 2) => Math.round(Number(Math.round(val + "e" + dec) + "e-" + dec) * 100);
 
 /**
  * Wandelt zwei als Hex-String definierte Farben in RGB-Standarisierte
@@ -49,7 +64,6 @@ let pctToFloat = (arrVals) => {
  */
 let pctToHex = (arr) => {
     return (
-        "#" +
         arr
             .map((pct) => Math.round((pct * 255) / 100))
             .map((rgb) => (rgb < 16 ? "0" + rgb.toString(16) : rgb.toString(16)))
@@ -100,13 +114,14 @@ let kontrast = (arrWerte) => {
 */
 let kontrastRatio = (kr, bg, fg = bg) => {
     let bgStdArr = hexToRgbStd(bg, fg);
+    // console.log(hexToRgbStd("abcdef")); //OK
     let lumis = lumi(bgStdArr);
     let arr = [...hexToRgbStd(bg, fg)[1]];
     let kontrMitSchwarz = kontrast(lumi([bgStdArr[0], [0, 0, 0]]));
     let kontrMitWeiss = kontrast(lumi([bgStdArr[0], [100, 100, 100]]));
     let step = kontrMitSchwarz > kontrMitWeiss ? 1 : -1;
     if (kontrMitSchwarz < kr && kontrMitWeiss < kr) kr = Math.max(kontrMitSchwarz, kontrMitWeiss); //return "Zielkontrast nicht erreichbar.";
-    if (kontrast(lumis) > kr) return "Kontrast ist bereits größer als Zielkontrast.";
+    if (kontrast(lumis) > kr) kr = kontrast(lumis); //return "Kontrast ist bereits größer als Zielkontrast.";
     let anpassen = () => {
         if (kontrast(lumis) >= kr) {
             return arr;
@@ -122,7 +137,7 @@ let kontrastRatio = (kr, bg, fg = bg) => {
         lumis = lumi([arr, [...hexToRgbStd(bg, fg)[0]]]);
         return anpassen();
     };
-    return { bg: "#" + bg, fg: pctToHex(anpassen()) };
+    return { bg: "#" + hexToArr(bg).join(""), fg: "#" + pctToHex(anpassen()) };
 };
 
 export { kontrastRatio };
