@@ -1,29 +1,28 @@
 /**
  * Wandelt den Hex-String einer Farbendefinition in ein Array mit
  * 3 Elementen. Der Parameter mag '#' voran haben oder nicht.
- * @param {string} hex Den Hex-String (zBs. '#ffab56' oder 'ffab56')
+ * @param {string} hex Den Hex-String (zBs. '#ffab56', '#abc' oder 'ffab56', 'abc')
  * @return {string[]} Array mit 3 (Hex) Elementen (zBs. ['ff', 'ab', '56'])
  * @see {@link hexToRgbStd}
  */
- let hexToArr = (hex) => {
-     let dreier = /\b[a-f0-9]{3}\b/i;
-     let sechser = /\b[a-f0-9]{6}\b/i;
-     try {
-         if (dreier.test(hex)) {
-             return hex.match(/[a-f0-9]{1}/gi).map((char) => char + char);
-         } else if(sechser.test(hex)) {
-             return hex.match(/[a-f0-9]{2}/gi);
-         } else {
-             throw "Es ist ein Fehler aufgetreten."
-         }
-     } catch(e) {
-         console.error(e)
-     }
- }
-//let hexToArr = (hex) => hex.match(/[a-f0-9]{2}/gi);
+let hexToArr = (hex) => {
+    let dreier = /\b[a-f0-9]{3}\b/i;
+    let sechser = /\b[a-f0-9]{6}\b/i;
+    try {
+        if (dreier.test(hex)) {
+            return hex.match(/[a-f0-9]{1}/gi).map((char) => char + char);
+        } else if (sechser.test(hex)) {
+            return hex.match(/[a-f0-9]{2}/gi);
+        } else {
+            throw "Es ist ein Fehler im Format der eingegebenen Farben vorhanden."
+        }
+    } catch (e) {
+        console.error(e)
+    }
+}
 
 /**
- * Rundet eine Dezimalzahl auf 2 Stellen auf (zBs. 3,78493271 auf 3,79).
+ * Rundet eine Dezimalzahl auf 2 Stellen auf (zBs. 3,785 auf 3,79).
  * @see {@link https://www.jacklmoore.com/notes/rounding-in-javascript/}
  * @param {number} val Dezimalzahl, die aufgerundet werden soll.
  * @param {number} [dec = 2] Dezimalstellen (Optional. 2 Stellen sind voreingestellt.)
@@ -65,9 +64,9 @@ let pctToFloat = (arrVals) => {
 let pctToHex = (arr) => {
     return (
         arr
-            .map((pct) => Math.round((pct * 255) / 100))
-            .map((rgb) => (rgb < 16 ? "0" + rgb.toString(16) : rgb.toString(16)))
-            .join("")
+        .map((pct) => Math.round((pct * 255) / 100))
+        .map((rgb) => (rgb < 16 ? "0" + rgb.toString(16) : rgb.toString(16)))
+        .join("")
     );
 };
 
@@ -83,11 +82,11 @@ let lumi = (farben) => {
     farbenFloat.forEach((arr) =>
         luminositaet.push(
             arr
-                .map((normFarbe) =>
-                    normFarbe <= 0.03928 ? normFarbe / 12.92 : ((normFarbe + 0.055) / 1.055) ** 2.4
-                )
-                .map((angepFarbe, i) => angepFarbe * spekGew[i])
-                .reduce((a, b) => a + b, 0)
+            .map((normFarbe) =>
+                normFarbe <= 0.03928 ? normFarbe / 12.92 : ((normFarbe + 0.055) / 1.055) ** 2.4
+            )
+            .map((angepFarbe, i) => angepFarbe * spekGew[i])
+            .reduce((a, b) => a + b, 0)
         )
     );
     return luminositaet;
@@ -101,7 +100,8 @@ let lumi = (farben) => {
 let kontrast = (arrWerte) => {
     let l1 = arrWerte[0],
         l2 = arrWerte[1];
-    if (l2 > l1) [l1, l2] = [l2, l1];
+    if (l2 > l1)
+        [l1, l2] = [l2, l1];
     return (l1 + 0.05) / (l2 + 0.05);
 };
 
@@ -113,15 +113,26 @@ let kontrast = (arrWerte) => {
    @return {Object} Objekt mit berechneten Farben (Hintergrund und Text) in Hex-Format.
 */
 let kontrastRatio = (kr, bg, fg = bg) => {
+    let resultatObj = {};
+    let krStart = kr;
     let bgStdArr = hexToRgbStd(bg, fg);
-    // console.log(hexToRgbStd("abcdef")); //OK
     let lumis = lumi(bgStdArr);
     let arr = [...hexToRgbStd(bg, fg)[1]];
-    let kontrMitSchwarz = kontrast(lumi([bgStdArr[0], [0, 0, 0]]));
-    let kontrMitWeiss = kontrast(lumi([bgStdArr[0], [100, 100, 100]]));
+    let kontrMitSchwarz = kontrast(lumi([bgStdArr[0],
+        [0, 0, 0]
+    ]));
+    let kontrMitWeiss = kontrast(lumi([bgStdArr[0],
+        [100, 100, 100]
+    ]));
     let step = kontrMitSchwarz > kontrMitWeiss ? 1 : -1;
-    if (kontrMitSchwarz < kr && kontrMitWeiss < kr) kr = Math.max(kontrMitSchwarz, kontrMitWeiss); //return "Zielkontrast nicht erreichbar.";
-    if (kontrast(lumis) > kr) kr = kontrast(lumis); //return "Kontrast ist bereits größer als Zielkontrast.";
+    if (kontrMitSchwarz < kr && kontrMitWeiss < kr) {
+        kr = Math.max(kontrMitSchwarz, kontrMitWeiss);
+        resultatObj.msg = `Zielkonstrat von ${roundPct(krStart)/100} mit vorgegebener Hintergrundfarbe ${"#"+bg} nicht erzielbar. Es wird der maximal erreichbarer Wert von ${roundPct(kr)/100} genommen.`;
+    }
+    if (kontrast(lumis) > kr) {
+        kr = kontrast(lumis); //return "Kontrast ist bereits größer als Zielkontrast.";
+        resultatObj.msg = `Vorgefundener Kontrast von ${kr} ist höher als erwünschten von ${krStart}`;
+    }
     let anpassen = () => {
         if (kontrast(lumis) >= kr) {
             return arr;
@@ -137,7 +148,12 @@ let kontrastRatio = (kr, bg, fg = bg) => {
         lumis = lumi([arr, [...hexToRgbStd(bg, fg)[0]]]);
         return anpassen();
     };
-    return { bg: "#" + hexToArr(bg).join(""), fg: "#" + pctToHex(anpassen()) };
+    resultatObj.bg = "#" + hexToArr(bg).join("");
+    resultatObj.fg = "#" + pctToHex(anpassen());
+    console.log(resultatObj);
+    return resultatObj;
 };
 
-export { kontrastRatio };
+export {
+    kontrastRatio
+};
