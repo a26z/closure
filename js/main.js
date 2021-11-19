@@ -4,8 +4,8 @@ import {
 
 let mainPart = document.getElementById("main");
 
-let farbenFunktion = (kontrast, bgFarbe) => {
-    let obj = kontrastRatio(kontrast, bgFarbe);
+let farbenFunktion = (kontrast, bgFarbe, fgFarbe = bgFarbe) => {
+    let obj = kontrastRatio(kontrast, bgFarbe, fgFarbe);
     return () => {
         mainPart.style.backgroundColor = obj.bg;
         mainPart.style.color = obj.fg;
@@ -21,5 +21,5 @@ let farbeId = [
 ];
 
 farbeId.forEach((arr) => {
-    document.getElementById(arr[0]).onclick = farbenFunktion(arr[1], arr[2]);
+    document.getElementById(arr[0]).onclick = farbenFunktion(arr[1], arr[2], arr[3]);
 });

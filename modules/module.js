@@ -1,6 +1,9 @@
+/** @module kontrastRatio */
+
 /**
  * Wandelt den Hex-String einer Farbendefinition in ein Array mit
  * 3 Elementen. Der Parameter mag '#' voran haben oder nicht.
+ * @public
  * @param {string} hex Den Hex-String (zBs. '#ffab56', '#abc' oder 'ffab56', 'abc')
  * @return {string[]} Array mit 3 (Hex) Elementen (zBs. ['ff', 'ab', '56'])
  * @see {@link hexToRgbStd}
@@ -106,15 +109,28 @@ let kontrast = (arrWerte) => {
 };
 
 /**
+ * @typedef {Object} resultatObj
+ * @property {string} bg Die Hintergrundfarbe
+ * @property {string} fg Die Vordergrund- bzw. Textfarbe
+ * @property {number} krStart Das gewünschte Kontrastverhältnis
+ * @property {number} kr Das erzielte Kontrastverhältnis
+ * @property {string} msg Info zur Berechnung
+ */
+/**
  * Berechnet Farbe für ein erwünschtes Kontrastverhältniss (kr)
  * @param {number} kr Das gewünschte Kontrastverhältnis
  * @param {string} bg Die Hintergrungfarbe in Hex-Format
  * @param {string} [fg = bg] Die Textfarbe
-   @return {Object} Objekt mit berechneten Farben (Hintergrund und Text) in Hex-Format.
-*/
-let kontrastRatio = (kr, bg, fg = bg) => {
+ * @return {resultatObj} Objekt mit Resultaten
+ */
+
+export const kontrastRatio = (kr, bg, fg = bg) => {
     let resultatObj = {};
-    let krStart = kr;
+    if(kr <1 || kr >21) {
+        resultatObj.msg = "Kontrastwert muss zwischen 1 und 21 betragen.";
+        return resultatObj;
+    }
+    resultatObj.krStart = kr;
     let bgStdArr = hexToRgbStd(bg, fg);
     let lumis = lumi(bgStdArr);
     let arr = [...hexToRgbStd(bg, fg)[1]];
@@ -127,14 +143,15 @@ let kontrastRatio = (kr, bg, fg = bg) => {
     let step = kontrMitSchwarz > kontrMitWeiss ? 1 : -1;
     if (kontrMitSchwarz < kr && kontrMitWeiss < kr) {
         kr = Math.max(kontrMitSchwarz, kontrMitWeiss);
-        resultatObj.msg = `Zielkonstrat von ${roundPct(krStart)/100} mit vorgegebener Hintergrundfarbe ${"#"+bg} nicht erzielbar. Es wird der maximal erreichbarer Wert von ${roundPct(kr)/100} genommen.`;
+        resultatObj.msg = `Zielkonstrat von ${roundPct(resultatObj.krStart)/100} mit vorgegebener Hintergrundfarbe ${"#"+bg} nicht erzielbar. Es wird der maximal erreichbarer Wert von ${roundPct(kr)/100} genommen.`;
     }
     if (kontrast(lumis) > kr) {
         kr = kontrast(lumis); //return "Kontrast ist bereits größer als Zielkontrast.";
-        resultatObj.msg = `Vorgefundener Kontrast von ${kr} ist höher als erwünschten von ${krStart}`;
+        resultatObj.msg = `Vorgefundener Kontrast von ${kr} ist höher als erwünschten von ${resultatObj.krStart}`;
     }
     let anpassen = () => {
         if (kontrast(lumis) >= kr) {
+            resultatObj.kr = roundPct(kontrast(lumis)) / 100;
             return arr;
         }
         for (let i = 0; i < arr.length; i++) {
@@ -148,12 +165,7 @@ let kontrastRatio = (kr, bg, fg = bg) => {
         lumis = lumi([arr, [...hexToRgbStd(bg, fg)[0]]]);
         return anpassen();
     };
-    resultatObj.bg = "#" + hexToArr(bg).join("");
+    resultatObj.bg = "#" + hexToArr(bg).join(""); // alle 6-stellig
     resultatObj.fg = "#" + pctToHex(anpassen());
-    console.log(resultatObj);
     return resultatObj;
-};
-
-export {
-    kontrastRatio
 };
