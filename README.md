@@ -63,14 +63,3 @@ kontrastRatio(7, "#ffffff", "#000000");
  */
 
 ```
-
-
-
-
-
-
-
-
-Es handelt sich um eine Funktion, die ich eigentlich für ein Bespiel eines Artikels zu Closures geschrieben habe. Beim Programmieren hat sie sich allerdings irgendwie verselbständigt und wurde sozusagen immer "mehr". An einem bestimmten Punkt musste ich sie daher eher abrupt beenden. Die Funktion funktioniert soweit, ich hätte aber gerne noch im Bereich des HTML weiter ausgearbeitet.
-
-Die Funktion erfüllt einen einfachen Zweck: sie berechnet den Wert einer Textfarbe, die einer Vorgabe des Kontrastverhältnisses zur Hintergrundfarbe genügt. Dabei werden nicht nur einfach Abstufungen von schwarz oder weiss angewandt (die Möglichkeit besteht), sondern Abstufungen der Hintergrundfarbe selbst.
