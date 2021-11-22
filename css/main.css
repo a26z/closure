@@ -16,12 +16,10 @@ nav {
 }
 
 main {
-    background-color: white;
-    color: black;
     padding: 50px;
     max-width: 800px;
     margin: auto;
-    transition: all 1000ms ease;
+    transition: all 750ms ease;
 }
 
 button {
@@ -49,4 +47,11 @@ button {
     justify-content: flex-end;
     margin: 10px auto;
     max-width: 900px;
+}
+
+.farbe {
+    display: inline-block;
+    width: 2em;
+    height: 17px;
+    background-color: #001324;
 }

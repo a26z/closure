@@ -5,21 +5,23 @@ import {
 let mainPart = document.getElementById("main");
 
 let farbenFunktion = (kontrast, bgFarbe, fgFarbe = bgFarbe) => {
-    let obj = kontrastRatio(kontrast, bgFarbe, fgFarbe);
+    let farbenObj = kontrastRatio(kontrast, bgFarbe, fgFarbe);
     return () => {
-        mainPart.style.backgroundColor = obj.bg;
-        mainPart.style.color = obj.fg;
+        mainPart.style.backgroundColor = farbenObj.bg;
+        mainPart.style.color = farbenObj.fg;
     }
 }
 
+farbenFunktion(21, "#fff")();
+
 let farbeId = [
-    ["cobaltd", 7, "001324"],
-    ["cobalth", 7, "d0d9e3"],
-    ["sepiad", 7, "602b12"],
-    ["sepiah", 7, "f7e1d6"],
-    ["sw", 21, "fff"]
+    ["cobaltd", 7, "#001324"],
+    ["cobalth", 7, "#d0d9e3"],
+    ["sepiad", 7, "#602b12"],
+    ["sepiah", 7, "#f7e1d6"]
 ];
 
 farbeId.forEach((arr) => {
-    document.getElementById(arr[0]).onclick = farbenFunktion(arr[1], arr[2], arr[3]);
+    document.getElementById(arr[0])
+        .addEventListener('click', farbenFunktion(arr[1], arr[2]));
 });
